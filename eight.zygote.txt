@@ -1,0 +1,51 @@
+eight.zygote<-function(obs){
+	marks=length(obs)
+	regions=data.frame();
+	reg=1;
+	zygs=c("000","001","011","111","010","100","110","101")
+	for(s1 in 1:(marks-2)){ 
+		for(s2 in (s1+1):(marks-1)){ 
+			for(s3 in (s2+1):(marks)){ 
+				eightcount=c(0,0,0,0,0,0,0,0);
+				for(n in 1:53){   
+					z=paste(obs[n,s1],obs[n,s2],obs[n,s3],sep="");
+					for( i in 1:8){  
+						if( z == zygs[i] ){
+							eightcount[i]=1;
+						}
+					}
+				} 
+				if(sum(eightcount)==8){ 
+					if( s1>1 ){ for(i in 1:(s1-1)){ regions[reg,i]=0; } }
+					regions[reg,s1]=1;
+					if(s2>s1+1){ 
+						for(j in (s1+1):(s2-1)){ regions[reg,j]=0; }
+					}
+					regions[reg,s2]=1;
+					if(s3>s2+1){ 
+						for(k in (s2+1):(s3-1)){ regions[reg,k]=0; }
+					}
+					regions[reg,s3]=1;
+					if(marks>s3){ for(l in (s3+1):(marks)){ regions[reg,l]=0; } }		
+					reg=reg+1;
+				}
+			}  
+		}
+	}
+	
+	#calculate min events
+	events=0;
+	if(reg>1){
+		while( length(regions[,1]) >0 ){
+			# sum values of each column (number of times marker fails)
+			tots=as.vector(mean(regions)*length(regions[,1]));
+			# which marker fails most
+			rem=which(tots==max(tots));
+			# find rows with this marker and remove
+			which(regions[,rem[1]]==1)
+			regions<-regions[c(-which(regions[,rem]==1)),]
+			events=events+1;
+		}
+	}
+	return(events)
+}
